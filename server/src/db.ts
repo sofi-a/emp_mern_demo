@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { createEmployees } from './seeder';
 
 export default (db: string) => {
   
@@ -6,7 +7,10 @@ export default (db: string) => {
         mongoose
             .connect(
                 db,
-                { useNewUrlParser: true }
+                {
+                    useNewUrlParser: true,
+                    useUnifiedTopology: true
+                }
             )
             .then(() => {
                 return console.info(`Successfully connected to ${db}`);
