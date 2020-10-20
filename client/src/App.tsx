@@ -1,30 +1,35 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import logo from './logo.svg';
-import './App.css';
+import Grid from '@material-ui/core/Grid';
 import store from './store';
+import EmployeesTable from './components/employees';
+import Toast from './components/Toast';
+import { createStyles, makeStyles, Theme } from '@material-ui/core';
 
-function App() {
-  return (
-    <Provider store={store}>
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.tsx</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-    </Provider>
-  );
+const useStyles = makeStyles((theme: Theme) => createStyles({
+    root: {
+        background: theme.palette.grey[50],
+        padding: theme.spacing(5)
+    }
+}));
+
+const App = () => {
+    const classes = useStyles();
+
+    return (
+        <Provider store={store}>
+            <Grid
+                container
+                spacing={0}
+                className={classes.root}
+            >
+                <Grid item>
+                    <Toast />
+                    <EmployeesTable />
+                </Grid>
+            </Grid>
+        </Provider>
+    );
 }
 
 export default App;

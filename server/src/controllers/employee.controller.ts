@@ -6,24 +6,26 @@ import { rootUrl } from '../config/constants';
 
 class EmployeeController extends Controller {
     async index(req: Request, res: Response) {
-        const limit: number = req.query.limit ? Number(req.query.limit) : 10;
-        const page: number = req.query.page ? Number(req.query.page) : 1;
-        const offset: number = limit * (page - 1);
+        const employeesCount : number = await Employee.countDocuments();
         const search: string | null = req.query.search ? String(req.query.search) : null;
-        const count: number = await Employee.countDocuments();
         const searchResultCount: number = search ?
             await Employee.countDocuments({ name_lc: { $regex: new RegExp(search, 'i') } }) : 0;
+        const limit: number = req.query.limit ?
+            Number(req.query.limit) === 0 ? search ? searchResultCount : employeesCount : 
+            Number(req.query.limit) : 10;
+        const page: number = req.query.page ? Number(req.query.page) : 1;
+        const offset: number = limit * (page - 1);
         const lastPage: number = search ? (
             searchResultCount > limit ? Math.ceil(searchResultCount/limit) : page
-        ) : count > limit ? Math.ceil(count/limit) : page;
+        ) : employeesCount > limit ? Math.ceil(employeesCount/limit) : page;
 
         const pageMeta = (employees: IEmployee[]): Page => ({
-            current_page: page,
+            current_page: (employees.length > 0) ? page : 0,
             per_page: limit,
-            from: offset + 1,
-            to: offset + employees.length,
-            total: search ? searchResultCount : count,
-            last_page: lastPage
+            from: (employees.length > 0) ? offset + 1 : 0,
+            to: (employees.length > 0) ? offset + employees.length : 0,
+            total: search ? searchResultCount : employeesCount ,
+            last_page: (employees.length > 0) ? lastPage : 0
         });
 
         const pageLinks: PageLinks = {
@@ -49,7 +51,7 @@ class EmployeeController extends Controller {
             const meta = employees.length > 0 ? {
                 page: pageMeta(employees),
                 links: pageLinks
-            } : undefined;
+            } : { page: pageMeta([]), links: pageLinks };
             if(!err) return res.json({
                 meta,
                 data: employees
